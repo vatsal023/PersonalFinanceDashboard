@@ -261,36 +261,62 @@ const BullionTable = ({ bullions, setRefresh }) => {
         </tbody>
       </table>
 
+
       {/* 🟢 Modal for Details */}
       {showModal && selectedBullion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg w-96 shadow-lg relative">
-            <h3 className="text-lg font-semibold mb-2 text-center">{selectedBullion.name} Details</h3>
-            <p><strong>Type:</strong> {selectedBullion.name}</p>
-            <p><strong>Quantity:</strong> {selectedBullion.investments[0].quantity}</p>
-            <p><strong>Purity:</strong> {selectedBullion.purity}</p>
-            <p><strong>Invested:</strong> ₹{selectedBullion.amountInvested}</p>
-            <p><strong>Current Rate:</strong> ₹{selectedBullion.currentRate}</p>
-            <p><strong>Status:</strong> {selectedBullion.status}</p>
-            <p><strong>Date:</strong> {new Date(selectedBullion.date).toLocaleDateString()}</p>
-            {selectedBullion.endDate && <p><strong>Sold On:</strong> {new Date(selectedBullion.endDate).toLocaleDateString()}</p>}
-            {selectedBullion.soldRate && <p><strong>Sold Price:</strong> ₹{selectedBullion.soldRate}</p>}
+  <div
+    className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+    onClick={() => setShowModal(false)}
+  >
+    <div
+      className="bg-white p-6 rounded-2xl shadow-xl w-[600px] max-h-[80vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-xl font-semibold mb-4 text-center text-gray-800">
+        {selectedBullion.name} — Investments
+      </h2>
 
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-4 bg-gray-600 text-white px-4 py-2 rounded w-full"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+      {loading ? (
+        <p className="text-center py-4">Loading details...</p>
+      ) : (
+        <table className="w-full border-collapse border text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border px-3 py-2">Date</th>
+              <th className="border px-3 py-2">Quantity (g)</th>
+              <th className="border px-3 py-2">Purity</th>
+              <th className="border px-3 py-2">Rate/g (₹)</th>
+              <th className="border px-3 py-2">Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedBullion.investments.map((inv, idx) => (
+              <tr key={idx} className="text-center hover:bg-gray-50">
+                <td className="border px-3 py-2">
+                  {new Date(inv.date).toLocaleDateString()}
+                </td>
+                <td className="border px-3 py-2">{inv.quantity}</td>
+                <td className="border px-3 py-2">{inv.purity}</td>
+                <td className="border px-3 py-2">₹{inv.rate.toFixed(2)}</td>
+                <td className="border px-3 py-2">₹{inv.amountInvested.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-lg">
-          Loading...
-        </div>
-      )}
+      <div className="text-center mt-4">
+        <button
+          onClick={() => setShowModal(false)}
+          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </>
   );
 };
