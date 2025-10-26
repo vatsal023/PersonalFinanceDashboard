@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "../Sidebar";
+import Sidebar from "../components/Sidebar";
 import Papa from "papaparse";
-import AddShareModal from "./AddShareModal";
-import SharesOverview from "./SharesOverview";
-import SharesTable from "./SharesTable";
+import AddShareModal from "../components/Shares/AddShareModal";
+import SharesOverview from "../components/Shares/SharesOverview";
+import SharesTable from "../components/Shares/SharesTable";
+import { useAuth } from "../context/authContext"
+import { useNavigate } from "react-router-dom";
+
 
 const SharesPage = () => {
   const [shares, setShares] = useState([]);
@@ -13,6 +16,16 @@ const SharesPage = () => {
 
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
+
+   const { isAuthenticated, checkAuth } = useAuth();
+           const navigate = useNavigate();
+  
+    useEffect(() => {
+            // checkAuth();
+            if (!isAuthenticated) {
+                navigate("/");
+            }
+        }, [])
 
   const fetchShares = async () => {
     try {
