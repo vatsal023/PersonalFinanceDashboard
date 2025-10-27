@@ -112,7 +112,7 @@ const fetchLiveNAVs = async (req, res) => {
         .toLowerCase();
 
     // Fetch all funds from DB
-    const funds = await MutualFund.find();
+    const funds = await MutualFund.find({userId: req.user._id});
 
     for (const fund of funds) {
       const fundNameNorm = normalize(fund.name);
@@ -149,7 +149,7 @@ const fetchLiveNAVs = async (req, res) => {
 
 const getAllFunds = async (req, res) => {
   try {
-    const funds = await MutualFund.find();
+    const funds = await MutualFund.find({userId:req.user._id}).sort({createdAt:-1});
     res.json(funds);
   } catch (error) {
     res.status(500).json({ message: "Error fetching mutual funds", error });
@@ -160,7 +160,7 @@ const getAllFunds = async (req, res) => {
 const addFund = async (req, res) => {
   try {
     const { name, frequency, investments, status, currNAV } = req.body;
-    const newFund = new MutualFund({ name, frequency, investments, status, currNAV });
+    const newFund = new MutualFund({ name, frequency, investments, status, currNAV,  userId: req.user._id, });
     await newFund.save();
     res.status(201).json(newFund);
   } catch (error) {
@@ -173,8 +173,13 @@ const updateFund = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    const updatedFund = await MutualFund.findByIdAndUpdate(id, updates, { new: true });
-    if (!updatedFund) return res.status(404).json({ message: "Fund not found" });
+    // const updatedFund = await MutualFund.findByIdAndUpdate(id, updates, { new: true });
+      const updatedFund = await MutualFund.findOneAndUpdate(
+      { _id: id, userId: req.user._id },
+      updates,
+      { new: true }
+    );
+    if (!updatedFund) return res.status(404).json({ message: "Fund not found or unauthorized" });
     res.json(updatedFund);
   } catch (error) {
     res.status(400).json({ message: "Error updating fund", error });
@@ -187,7 +192,8 @@ const markAsSold = async (req, res) => {
     const { id } = req.params;
     const { endDate,soldNAV } = req.body;    ///also accept sold nav
 
-    const fund = await MutualFund.findById(id);
+    const fund = await MutualFund.findOne({ _id: id, userId: req.user._id });
+    // const fund = await MutualFund.findById(id);
     if (!fund) return res.status(404).json({ message: "Fund not found" });
 
     fund.status = "sold";
@@ -204,7 +210,8 @@ const markAsSold = async (req, res) => {
 
 const getFundById = async (req, res) => {
   try {
-    const fund = await MutualFund.findById(req.params.id);
+    const fund = await MutualFund.findOne({ _id: req.params.id, userId: req.user._id });
+    // const fund = await MutualFund.findById(req.params.id);
     if (!fund) return res.status(404).json({ message: "Fund not found" });
     res.json(fund);
   } catch (error) {
