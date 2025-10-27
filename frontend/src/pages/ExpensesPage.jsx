@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "../Sidebar";
-import ExpenseOverview from "./ExpenseOverview";
-import ExpenseList from "./ExpenseList";
-import AddExpenseModal from "./AddExpenseModal";
-import { categories } from "../../data/categories";
+import Sidebar from "../components/Sidebar";
+import ExpenseOverview from "../components/Expenses/ExpenseOverview";
+import ExpenseList from "../components/Expenses/ExpenseList";
+import AddExpenseModal from "../components/Expenses/AddExpenseModal";
+import { categories } from "../data/categories";
+import { useAuth } from "../context/authContext"
+import { useNavigate } from "react-router-dom";
 
 const ExpensesPage = () => {
   const [expenses, setExpenses] = useState([]);
@@ -13,6 +15,17 @@ const ExpensesPage = () => {
   const [selectedPage, setSelectedPage] = useState("Expenses");
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
   const [categoryTotals, setCategoryTotals] = useState({});
+
+   const { isAuthenticated, checkAuth } = useAuth();
+           const navigate = useNavigate();
+  
+    useEffect(() => {
+          
+            // checkAuth();
+            if (!isAuthenticated) {
+                navigate("/");
+            }
+        }, [])
 
   const triggerRefresh = () => setRefresh(!refresh);
 
