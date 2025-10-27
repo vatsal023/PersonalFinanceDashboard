@@ -32,13 +32,14 @@ const {
   getFundById,
   fetchLiveNAVs,
 } = require("../Controllers/mutualFundController");
+const auth = require("../middleware/auth");
 
-router.get("/", getAllFunds);
-router.post("/", addFund);
-router.put("/:id", updateFund);
-router.put("/:id/sell", markAsSold);
-router.get("/:id", getFundById);
+router.get("/",auth,getAllFunds);
+router.post("/",auth,addFund);
+router.put("/:id",auth,updateFund);
+router.put("/:id/sell",auth,markAsSold);
+router.get("/:id",auth,getFundById);
 
-router.get("/fetch-navs/update", fetchLiveNAVs);
+router.get("/fetch-navs/update",auth,fetchLiveNAVs);
 
 module.exports = router;
