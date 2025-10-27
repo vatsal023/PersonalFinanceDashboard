@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-// import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/authContext";
 
 const Login = () => {
   const [data, setData] = useState({
@@ -14,15 +14,15 @@ const Login = () => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
   const navigate = useNavigate();
-//   const { isAuthenticated, setAuthenticated } = useAuth();
+  const { isAuthenticated, setAuthenticated } = useAuth();
 
-//   useEffect(() => {
-//     console.log(isAuthenticated);
-//     if (isAuthenticated) {
-//       navigate("/");
-//       // console.log("Checked")
-//     }
-//   }, [isAuthenticated]);
+  useEffect(() => {
+    console.log(isAuthenticated);
+    if (isAuthenticated) {
+      navigate("/");
+      // console.log("Checked")
+    }
+  }, [isAuthenticated]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +38,7 @@ const Login = () => {
       console.log(response.data.message);
       if (response.status == 200) {
         toast.success(response.data.message);
-        // setAuthenticated(true);
+        setAuthenticated(true);
       }
     } catch (error) {
       if (
