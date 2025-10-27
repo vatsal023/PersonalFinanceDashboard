@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Papa from "papaparse";
-import Sidebar from "../Sidebar";
-import AddMutualFundModal from "./AddMutualFundModal";
-import MutualFundOverview from "./MutualFundOverview";
-import MutualFundTable from "./MutualFundTable";
+import Sidebar from "../components/Sidebar";
+import AddMutualFundModal from "../components/MutualFunds/AddMutualFundModal";
+import MutualFundOverview from "../components/MutualFunds/MutualFundOverview";
+import MutualFundTable from "../components/MutualFunds/MutualFundTable";
+import { useAuth } from "../context/authContext"
+import { useNavigate } from "react-router-dom";
 
 const MutualFundsPage = () => {
   const [mutualFunds, setMutualFunds] = useState([]);
@@ -14,6 +16,15 @@ const MutualFundsPage = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+   const { isAuthenticated, checkAuth } = useAuth();
+           const navigate = useNavigate();
+  
+    useEffect(() => {
+            // checkAuth();
+            if (!isAuthenticated) {
+                navigate("/");
+            }
+        }, [])
 
   // ✅ Fetch all mutual funds
   const fetchMutualFunds = async () => {

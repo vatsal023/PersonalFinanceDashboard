@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Papa from "papaparse";
-import Sidebar from "../Sidebar";
-import AddBullionModal from "./AddBullionModal";
-import BullionTable from "./BullionTable";
-import BullionOverview from "./BullionOverview"; // ➕ Create this like MutualFundOverview
+import Sidebar from "../components/Sidebar";
+import AddBullionModal from "../components/Bullion/AddBullionModal";
+import BullionTable from "../components/Bullion/BullionTable";
+import BullionOverview from "../components/Bullion/BullionOverview"; // ➕ Create this like MutualFundOverview
+import { useAuth } from "../context/authContext"
+import { useNavigate } from "react-router-dom";
 
 const BullionPage = () => {
   const [bullions, setBullions] = useState([]);
@@ -17,6 +19,15 @@ const BullionPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+   const { isAuthenticated, checkAuth } = useAuth();
+           const navigate = useNavigate();
+  
+    useEffect(() => {
+            // checkAuth();
+            if (!isAuthenticated) {
+                navigate("/");
+            }
+        }, [])
   // ✅ Fetch all bullions
   const fetchBullions = async () => {
     try {
