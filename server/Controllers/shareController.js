@@ -4,7 +4,7 @@ const yf = require("yahoo-finance2").default;
 // Get all shares
 const getShares = async (req, res) => {
   try {
-    const shares = await Share.find().sort({ createdAt: -1 });
+    const shares = await Share.find({userId: req.user._id }).sort({ createdAt: -1 });
     res.json(shares);
   } catch (error) {
     res.status(500).json({ message: "Error fetching shares", error });
@@ -14,7 +14,7 @@ const getShares = async (req, res) => {
 // Add new share
 const addShare = async (req, res) => {
   try {
-    const { companyName, exchange, startDate, amount, numberOfShares } = req.body;
+    const {companyName, exchange, startDate, amount, numberOfShares} = req.body;
 
      // Check if an active share for the same company exists
     // let existingShare = await Share.findOne({ companyName,exchange,status: "active" });
@@ -48,6 +48,7 @@ const addShare = async (req, res) => {
     console.log("Resolved symbol:", symbol, "for", companyName);
 
     const newShare = new Share({
+       userId: req.user._id,
       companyName,
       exchange,
       symbol,
@@ -55,6 +56,7 @@ const addShare = async (req, res) => {
       amount,
       numberOfShares,
       currValue: amount, // default current value = invested
+      
     });
 
     const saved = await newShare.save();
@@ -102,11 +104,18 @@ const addShare = async (req, res) => {
 const updateCurrentValue = async (req, res) => {
   try {
     const { currValue } = req.body;
-    const updated = await Share.findByIdAndUpdate(
-      req.params.id,
+     const updated = await Share.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
       { currValue },
       { new: true }
     );
+
+    if (!updated) return res.status(404).json({ message: "Share not found or unauthorized" });
+    // const updated = await Share.findByIdAndUpdate(
+    //   req.params.id,
+    //   { currValue },
+    //   { new: true }
+    // );
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: "Error updating current value", error });
@@ -119,9 +128,9 @@ const updateCurrentValue = async (req, res) => {
 const markAsSold = async (req, res) => {
   try {
     const { endDate,soldPrice } = req.body;
-    const share = await Share.findById(req.params.id);
-
-    if (!share) return res.status(404).json({ message: "Share not found" });
+    // const share = await Share.findById(req.params.id);
+const share = await Share.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!share) return res.status(404).json({ message: "Share not found or unauthorized" });
 
     // Use current value as sold price
      const priceToSet = soldPrice ?? share.currValue ?? 0;
@@ -178,7 +187,7 @@ const markAsSold = async (req, res) => {
 
 const getSoldShares = async (req, res) => {
   try {
-    const soldShares = await Share.find({ status: "sold" }).sort({ endDate: -1 });
+    const soldShares = await Share.find({userId: req.user._id, status: "sold" }).sort({ endDate: -1 });
     res.json(soldShares);
   } catch (error) {
     res.status(500).json({ message: "Error fetching sold shares", error });
@@ -187,7 +196,9 @@ const getSoldShares = async (req, res) => {
 // Delete share
 const deleteShare = async (req, res) => {
   try {
-    await Share.findByIdAndDelete(req.params.id);
+    const deleted = await Share.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
+     if (!deleted) return res.status(404).json({ message: "Share not found or unauthorized" });
+    // await Share.findByIdAndDelete(req.params.id);
     res.json({ message: "Share deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting share", error });
@@ -197,7 +208,7 @@ const deleteShare = async (req, res) => {
 // Fetch live prices for all active shares
 const fetchLivePrices = async (req, res) => {
   try {
-    const shares = await Share.find();
+    const shares = await Share.find({ userId: req.user._id});
     const results = await Promise.all(
       shares.map(async (s) => {
         try {
