@@ -102,7 +102,7 @@ const fetchSymbolFromName = async (name) => {
 
 const fetchLiveRates = async (req, res) => {
   try {
-    const bullions = await Bullion.find({ status: "active" });
+    const bullions = await Bullion.find({ status: "active", userId: req.user._id});
     const USD_TO_INR = 87.97;
     const OUNCE_TO_GRAM = 31.1035;
 
@@ -157,7 +157,7 @@ const fetchLiveRates = async (req, res) => {
 // Get all bullions
 const getAllBullions = async (req, res) => {
   try {
-    const bullions = await Bullion.find();
+    const bullions = await Bullion.find({userId: req.user._id }).sort({createdAt:-1});
     res.json(bullions);
   } catch (err) {
     res.status(500).json({ message: "Error fetching bullions", error: err });
@@ -169,8 +169,10 @@ const addBullion = async (req, res) => {
   try {
     const { name, investments, status, currentRate } = req.body;
 
-    let bullion = await Bullion.findOne({ name,
-        "investments.purity": investments[0].purity
+    let bullion = await Bullion.findOne({ 
+         name,
+        "investments.purity": investments[0].purity,
+         userId: req.user._id, // ✅ filter by logged-in user
     });
 
     if (bullion) {
@@ -185,6 +187,7 @@ const addBullion = async (req, res) => {
         status: status || "active",
         investments,
         currentRate: currentRate || 0,
+         userId: req.user._id, // ✅ associate user
       });
       await bullion.save();
     }
@@ -201,7 +204,12 @@ const updateBullion = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const updatedBullion = await Bullion.findByIdAndUpdate(id, updates, { new: true });
+     const updatedBullion = await Bullion.findOneAndUpdate(
+      { _id: id, userId: req.user._id },
+      updates,
+      { new: true }
+    );
+    // const updatedBullion = await Bullion.findByIdAndUpdate(id, updates, { new: true });
     if (!updatedBullion) return res.status(404).json({ message: "Bullion not found" });
 
     res.json(updatedBullion);
@@ -216,7 +224,8 @@ const markAsSold = async (req, res) => {
     const { id } = req.params;
     const { endDate, soldRate } = req.body;
 
-    const bullion = await Bullion.findById(id);
+      const bullion = await Bullion.findOne({ _id: id, userId: req.user._id });
+    // const bullion = await Bullion.findById(id);
     if (!bullion) return res.status(404).json({ message: "Bullion not found" });
 
     bullion.status = "sold";
@@ -233,7 +242,8 @@ const markAsSold = async (req, res) => {
 // Get bullion by ID
 const getBullionById = async (req, res) => {
   try {
-    const bullion = await Bullion.findById(req.params.id);
+    const bullion = await Bullion.findOne({ _id: req.params.id, userId: req.user._id });
+    // const bullion = await Bullion.findById(req.params.id);
     if (!bullion) return res.status(404).json({ message: "Bullion not found" });
     res.json(bullion);
   } catch (err) {
