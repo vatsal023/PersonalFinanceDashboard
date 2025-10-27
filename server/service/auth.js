@@ -6,6 +6,7 @@ function setUser(user){
         firstName:user.firstName,
         lastName:user.lastName,
         email:user.email,
+         plaidItems: user.plaidItems,
     }
     ,process.env.JWTPRIVATEKEY,
     {expiresIn:"7d"}
