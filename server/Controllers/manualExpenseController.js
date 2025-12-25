@@ -5,6 +5,7 @@ const Expense = require("../models/ManualExpenseModel");
 // @access  Private
 exports.addExpense = async (req, res) => {
   try {
+
     const { category, amount, description, date } = req.body;
 
     const expense = new Expense({
@@ -28,6 +29,7 @@ exports.addExpense = async (req, res) => {
 // @access  Private
 exports.getExpenses = async (req, res) => {
   try {
+    
     const { month } = req.query; // e.g., "2025-10"
     const filter = { userId: req.user._id };
 
@@ -53,6 +55,7 @@ exports.getExpenseOverview = async (req, res) => {
   try {
     const { month } = req.query;
     const filter = { userId: req.user._id };
+    
 
     if (month) {
       const startDate = new Date(`${month}-01T00:00:00.000Z`);
