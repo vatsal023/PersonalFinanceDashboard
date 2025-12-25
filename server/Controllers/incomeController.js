@@ -44,7 +44,6 @@ exports.getIncomes = async (req, res) => {
 exports.deleteIncome = async (req, res) => {
   try {
     const { id } = req.params;
-    // const income = await Income.findById(id);
      const income = await Income.findOne({ _id: id, userId: req.user._id }); // 👈 user-level protection
     if (!income) return res.status(404).json({ message: "Income not found or unauthorized" });
 
