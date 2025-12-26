@@ -25,12 +25,6 @@ const mutualFundSchema = new mongoose.Schema({
   endDate: { type: Date },
    soldNAV: { type: Number },  ///added   
 
-    // ✅ Associate each fund with a user
-    // userId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    //   required: true,
-    // },
 },
 {timestamps:true}
 );

@@ -1,97 +1,8 @@
 const MutualFund = require("../models/MutualFundModel");
 const axios = require('axios');
-// ✅ Get all mutual funds
 
-//not working for all
-// const fetchLiveNAVs = async (req, res) => {
-//   try {
-//     const response = await axios.get("https://www.amfiindia.com/spages/NAVAll.txt");
-//     const navData = response.data;
 
-//     const lines = navData.split("\n");
-//     const updates = [];
-
-//     // Fetch all funds from DB
-//     const funds = await MutualFund.find();
-
-//     for (const fund of funds) {
-//       // Match line containing fund name (case-insensitive)
-//       const line = lines.find((l) =>
-//         l.toLowerCase().includes(fund.name.toLowerCase())
-//       );
-//        console.log(fund.name, line ? "FOUND" : "NOT FOUND");
-
-//       if (line) {
-//         const parts = line.split(";");
-//         const latestNAV = parseFloat(parts[4]); // 5th field is NAV
-//         if (!isNaN(latestNAV)) {
-//           fund.currNAV = latestNAV;
-//           await fund.save();
-//           updates.push({ name: fund.name, currNAV: latestNAV });
-//         }
-//       }
-//     }
-
-//     res.json({
-//       message: `Updated NAVs for ${updates.length} funds`,
-//       updatedFunds: updates,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching NAVs:", error);
-//     res.status(500).json({ message: "Failed to fetch NAVs", error });
-//   }
-// };
-
-///this one working
-// const fetchLiveNAVs = async (req, res) => {
-//   try {
-//     const response = await axios.get("https://www.amfiindia.com/spages/NAVAll.txt");
-//     const navData = response.data;
-
-//     const lines = navData.split("\n");
-//     const updates = [];
-
-//     // Helper: normalize fund names
-//     const normalize = (str) =>
-//       str
-//         .replace(/[-\/]/g, " ")       // replace hyphens and slashes with space
-//         .replace(/\s+/g, " ")         // collapse multiple spaces
-//         .trim()
-//         .toLowerCase();
-
-//     // Fetch all funds from DB
-//     const funds = await MutualFund.find();
-
-//     for (const fund of funds) {
-//       const fundNameNorm = normalize(fund.name);
-
-//       // Find line that contains normalized fund name
-//       const line = lines.find((l) => normalize(l).includes(fundNameNorm));
-
-//       console.log(fund.name, line ? "FOUND" : "NOT FOUND");
-
-//       if (line) {
-//         const parts = line.split(";");
-//         const latestNAV = parseFloat(parts[4]); // 5th field is NAV
-//         if (!isNaN(latestNAV)) {
-//           fund.currNAV = latestNAV;
-//           await fund.save();
-//           updates.push({ name: fund.name, currNAV: latestNAV });
-//         }
-//       }
-//     }
-
-//     res.json({
-//       message: `Updated NAVs for ${updates.length} funds`,
-//       updatedFunds: updates,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching NAVs:", error);
-//     res.status(500).json({ message: "Failed to fetch NAVs", error });
-//   }
-// };
-
-///this one also working
+///Fetch live NAVs from AMFI and update DB
 const fetchLiveNAVs = async (req, res) => {
   try {
     const response = await axios.get("https://www.amfiindia.com/spages/NAVAll.txt", {
@@ -159,6 +70,8 @@ const getAllFunds = async (req, res) => {
 // ✅ Add a new mutual fund
 const addFund = async (req, res) => {
   try {
+
+    console.log("Add Fund Req Body:", req.body);
     const { name, frequency, investments, status, currNAV } = req.body;
     const newFund = new MutualFund({ name, frequency, investments, status, currNAV,  userId: req.user._id, });
     await newFund.save();
