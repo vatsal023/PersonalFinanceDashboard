@@ -1,14 +1,13 @@
-
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Papa from "papaparse";
 import Sidebar from "../components/Sidebar";
 import AddBullionModal from "../components/Bullion/AddBullionModal";
 import BullionTable from "../components/Bullion/BullionTable";
-import BullionOverview from "../components/Bullion/BullionOverview"; // ➕ Create this like MutualFundOverview
-import { useAuth } from "../context/authContext"
+import BullionOverview from "../components/Bullion/BullionOverview";
+import { useAuth } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
+import { FaUpload, FaFilter, FaSync, FaTimes } from "react-icons/fa";
 
 const BullionPage = () => {
   const [bullions, setBullions] = useState([]);
@@ -18,17 +17,22 @@ const BullionPage = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
-   const { isAuthenticated, checkAuth } = useAuth();
-           const navigate = useNavigate();
-  
-    useEffect(() => {
-            // checkAuth();
-            if (!isAuthenticated) {
-                navigate("/");
-            }
-        }, [])
-  // ✅ Fetch all bullions
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {                                                           
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    fetchBullions();
+  }, [refresh]);
+
+  // Fetch all bullions
   const fetchBullions = async () => {
     try {
       const res = await axios.get("/api/bullions");
@@ -38,15 +42,10 @@ const BullionPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchBullions();
-  }, [refresh]);
-
-  // ✅ Handle CSV Upload
+  // CSV Upload
   const handleCSVUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -59,7 +58,6 @@ const BullionPage = () => {
             const quantity = Number(row.quantity) || 0;
             const rate = Number(row.rate) || 0;
             const date = row.date || new Date();
-
             const investment = {
               date,
               quantity,
@@ -67,24 +65,13 @@ const BullionPage = () => {
               rate,
               amountInvested: quantity * rate * (purity / 24),
             };
-
-            // Check if bullion already exists
-            const existing = bullions.find(
-              (b) => b.name.toLowerCase() === bullionName.toLowerCase()
-              && b.investments[0].purity === Number(form.purity)  // check purity
-            );
-
+            // Check if exists by name & purity
+            const existing = bullions.find((b) => b.status === "active" && b.name?.toLowerCase() === bullionName.toLowerCase() && b.investments[0]?.purity === purity);
             if (existing) {
               existing.investments.push(investment);
-              await axios.put(`/api/bullions/${existing._id}`, {
-                investments: existing.investments,
-              });
+              await axios.put(`/api/bullions/${existing._id}`, { investments: existing.investments });
             } else {
-              await axios.post("/api/bullions", {
-                name: bullionName,
-                investments: [investment],
-                 status: "active",
-              });
+              await axios.post("/api/bullions", { name: bullionName, investments: [investment], status: "active" });
             }
           } catch (error) {
             console.error("Error adding bullion from CSV:", error);
@@ -95,12 +82,12 @@ const BullionPage = () => {
     });
   };
 
-  // ✅ Fetch Live Prices
+  // Fetch Live Prices
   const handleFetchLiveRates = async () => {
     try {
       setLoading(true);
       setMessage("");
-      const res = await axios.get("/api/bullions/live/rates");
+      await axios.get("/api/bullions/live/rates");
       setMessage("✅ Prices updated successfully");
       setRefresh((prev) => !prev);
     } catch (error) {
@@ -108,32 +95,28 @@ const BullionPage = () => {
       setMessage("❌ Failed to update prices.");
     } finally {
       setLoading(false);
-      setTimeout(() => setMessage(""), 4000);
+      setTimeout(() => setMessage("") , 4000);
     }
   };
 
-  // ✅ Filter bullions by date range
+  // Filters
   const filteredBullions = bullions.filter((b) => {
     const firstDate = b.investments?.[0]?.date;
     const bullionDate = new Date(firstDate);
     const start = filterStartDate ? new Date(filterStartDate) : null;
     const end = filterEndDate ? new Date(filterEndDate) : null;
-
     if (start && end) return bullionDate >= start && bullionDate <= end;
     if (start) return bullionDate >= start;
     if (end) return bullionDate <= end;
     return true;
   });
 
-  // ✅ Overview Calculations
-  const totalInvested = filteredBullions.reduce(
-    (sum, b) =>
-      sum +
-      b.investments.reduce((s, inv) => s + (inv.amountInvested || 0), 0),
-    0
-  );
+  const activeBullions = filteredBullions.filter(b => b.status === "active");
 
-  const totalCurrentValue = filteredBullions.reduce((sum, b) => {
+  // Overview calculations
+  const totalInvested = activeBullions.reduce(
+    (sum, b) => sum + b.investments.reduce((s, inv) => s + (inv.amountInvested || 0), 0), 0);
+  const totalCurrentValue = activeBullions.reduce((sum, b) => {
     const currentRate = b.currentRate || b.rate || 0;
     const totalQty = b.investments.reduce((s, inv) => s + inv.quantity, 0);
     const purity = b.investments?.[0]?.purity || 24;
@@ -141,33 +124,33 @@ const BullionPage = () => {
   }, 0);
 
   const totalProfitLoss = totalCurrentValue - totalInvested;
-  const entryCount = filteredBullions.length;
+  const entryCount = activeBullions.length;
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-yellow-50/30 to-orange-50/20">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
       <div
-        className={`flex-1 p-6 transition-all duration-300 relative ${
-          isSidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`flex-1 p-6 transition-all duration-300 relative ${isSidebarOpen ? "ml-64" : "ml-16"}`}
         style={{ minWidth: 0 }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Bullion Overview</h2>
-          <div className="flex items-center gap-4">
+        {/* Header  */}
+        <div className="mb-8">
+          <div className="mb-2 flex items-center gap-3">
+            <FaSync className="text-yellow-500 text-xl" />
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Bullion Portfolio</h1>
+          </div>
+          <p className="text-gray-600 mt-1 mb-3">Track and manage your bullion (gold/silver/metal) investments</p>
+          <div className="flex flex-wrap gap-3 items-center">
             <button
               onClick={handleFetchLiveRates}
               disabled={loading}
-              className={`${
-                loading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
-              } text-white px-4 py-2 rounded transition`}
+              className={`${loading ? "bg-blue-400 cursor-not-allowed" : "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-orange-400"} text-white px-5 py-2.5 rounded-xl shadow-lg transition-all font-semibold flex items-center gap-2 transform hover:-translate-y-0.5`}
             >
-              {loading ? "Updating..." : "Refresh Prices"}
+              <FaSync className={loading ? "animate-spin" : ""} />
+              {loading ? "Updating..." : "Refresh Bullion Prices"}
             </button>
-
-            <label className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-green-700">
+            <label className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:from-emerald-600 hover:to-emerald-700 transition-all cursor-pointer font-semibold flex items-center gap-2 transform hover:-translate-y-0.5">
+              <FaUpload />
               Upload CSV
               <input
                 type="file"
@@ -176,62 +159,77 @@ const BullionPage = () => {
                 className="hidden"
               />
             </label>
-
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              className="bg-white text-gray-700 px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl border border-gray-200 hover:bg-gray-50 transition-all font-semibold flex items-center gap-2"
+            >
+              <FaFilter />
+              Filters
+            </button>
             <AddBullionModal setRefresh={setRefresh} />
           </div>
+
+          {/* Filters Section */}
+          {showFilters && (
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-lg mb-6 animate-in slide-in-from-top-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Filter by Date Range</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                  <input
+                    type="date"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all outline-none bg-white"
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                  <input
+                    type="date"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all outline-none bg-white"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    onClick={() => {
+                      setFilterStartDate("");
+                      setFilterEndDate("");
+                    }}
+                    className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-all font-semibold"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Message */}
+        {/* Toast Message */}
         {message && (
-          <div
-            className={`mb-4 text-sm px-4 py-2 rounded ${
-              message.includes("✅")
-                ? "bg-green-100 text-green-700 border border-green-400"
-                : "bg-red-100 text-red-700 border border-red-400"
-            }`}
-          >
+          <div className={`mb-4 text-sm px-4 py-2 rounded ${message.includes("✅") ? "bg-green-100 text-green-700 border border-green-400" : "bg-red-100 text-red-700 border border-red-400"}`}>
             {message}
           </div>
         )}
 
-        {/* Overview Section */}
+        {/* Overview Cards */}
         <BullionOverview
           totalInvested={totalInvested.toFixed(2)}
           totalCurrentValue={totalCurrentValue.toFixed(2)}
           totalProfitLoss={totalProfitLoss.toFixed(2)}
           entryCount={entryCount}
         />
-
-        {/* Filter Section */}
-        <div className="mb-4 flex flex-wrap gap-4 items-center">
-          <label className="flex items-center gap-2">
-            Start Date:
-            <input
-              type="date"
-              value={filterStartDate}
-              onChange={(e) => setFilterStartDate(e.target.value)}
-              className="border p-2 rounded"
-            />
-          </label>
-          <label className="flex items-center gap-2">
-            End Date:
-            <input
-              type="date"
-              value={filterEndDate}
-              onChange={(e) => setFilterEndDate(e.target.value)}
-              className="border p-2 rounded"
-            />
-          </label>
-          <button
-            onClick={() => {
-              setFilterStartDate("");
-              setFilterEndDate("");
-            }}
-            className="bg-gray-500 text-white px-3 py-1 rounded"
-          >
-            Clear Filter
-          </button>
-        </div>
 
         {/* Table Section */}
         <div className="mt-6 text-left bg-white p-6 rounded-xl shadow hover:shadow-xl transition overflow-x-auto">
@@ -246,4 +244,3 @@ const BullionPage = () => {
 };
 
 export default BullionPage;
-

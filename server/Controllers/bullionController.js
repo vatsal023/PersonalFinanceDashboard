@@ -1,88 +1,6 @@
 const Bullion = require("../models/BullionModel");
 const axios = require("axios");
 const yahooFinance = require("yahoo-finance2").default;
-// Fetch live rates for active bullions
-// const fetchLiveRates = async (req, res) => {
-//   try {
-//     const bullions = await Bullion.find({ status: "active" });
-//     const USD_TO_INR = 87.97;
-//     const OUNCE_TO_GRAM = 31.1035;
-
-//     const symbolMap = {
-//       gold: "GC=F",
-//       silver: "SI=F",
-//       platinum: "PL=F",
-//       palladium: "PA=F",
-//     };
-
-//     const updates = [];
-
-//     for (const bullion of bullions) {
-//       const symbol = bullion.symbol || symbolMap[bullion.name.toLowerCase()];
-//       if (!symbol) continue;
-
-//       try {
-//         const quote = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`);
-//         const priceUSD = quote.data.chart.result[0].meta.regularMarketPrice;
-//         const priceINR = (priceUSD * USD_TO_INR) / OUNCE_TO_GRAM;
-
-//         bullion.currentRate = priceINR;
-//         await bullion.save();
-//         updates.push({ name: bullion.name, rate: priceINR.toFixed(2) });
-//       } catch (err) {
-//         console.warn(`Failed to fetch for ${bullion.name} (${symbol})`);
-//       }
-//     }
-
-//     res.json({ message: `Updated ${updates.length} bullions`, updatedBullions: updates });
-//   } catch (err) {
-//     res.status(500).json({ message: "Failed to fetch live rates", error: err });
-//   }
-// };
-
-// const fetchLiveRates  = async(req,res)=>{
-//   try {
-//     const bullions = await Bullion.find({ status: "active" });
-//     const USD_TO_INR = 87.97;
-//     const OUNCE_TO_GRAM = 31.1035;
-
-//     const updatedBullions = [];
-
-//     for (const b of bullions) {
-//         console.log(b);
-//       if (!b.symbol) continue;
-
-//       try {
-//         const quote = await yahooFinance.quote(b.symbol);
-//         const latestPriceUSD = quote.regularMarketPrice;
-//         const pricePerGramINR = (latestPriceUSD / OUNCE_TO_GRAM) * USD_TO_INR;
-//         console.log(pricePerGramINR);
-
-//         b.currentRate = pricePerGramINR;
-//         await b.save();
-
-//         updatedBullions.push({
-//           name: b.name,
-//           symbol: b.symbol,
-//           rateINR: pricePerGramINR.toFixed(2),
-//           lastUpdated: new Date(quote.regularMarketTime * 1000).toLocaleString(),
-//         });
-//       } catch (err) {
-//         console.warn(`⚠️ Failed to fetch for ${b.name} (${b.symbol}): ${err.message}`);
-//       }
-//     }
-
-//     res.json({
-//       success: true,
-//       updated: updatedBullions.length,
-//       data: updatedBullions,
-//     });
-//   } catch (err) {
-//     console.error("❌ Error fetching live prices:", err);
-//     res.status(500).json({ success: false, message: "Failed to fetch live prices" });
-//   }
-// };
-
 
 const fetchSymbolFromName = async (name) => {
   try {
@@ -102,7 +20,8 @@ const fetchSymbolFromName = async (name) => {
 
 const fetchLiveRates = async (req, res) => {
   try {
-    const bullions = await Bullion.find({ status: "active", userId: req.user._id});
+    const bullions = await Bullion.find({userId: req.user._id});
+    console.log("Bullions",bullions);
     const USD_TO_INR = 87.97;
     const OUNCE_TO_GRAM = 31.1035;
 
@@ -172,6 +91,7 @@ const addBullion = async (req, res) => {
     let bullion = await Bullion.findOne({ 
          name,
         "investments.purity": investments[0].purity,
+        status: "active",
          userId: req.user._id, // ✅ filter by logged-in user
     });
 

@@ -120,8 +120,6 @@ const MutualFundsPage = () => {
     if (end) return mfDate <= end;
     return true;
   });
-
-  console.log("Filtered Funds:", filteredFunds);
    
   const activeFunds = filteredFunds.filter(
   (mf) => mf.status === "active"

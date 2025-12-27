@@ -71,7 +71,6 @@ const getAllFunds = async (req, res) => {
 const addFund = async (req, res) => {
   try {
 
-    console.log("Add Fund Req Body:", req.body);
     const { name, frequency, investments, status, currNAV } = req.body;
     const newFund = new MutualFund({ name, frequency, investments, status, currNAV,  userId: req.user._id, });
     await newFund.save();
