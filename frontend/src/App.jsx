@@ -85,7 +85,7 @@ const router = createBrowserRouter([
       {
         path: "/analytics",
         element: <Analytics />
-      }
+      },
       // {
       //   path: "/connect-bank",
       //   element: <ConnectBank />
