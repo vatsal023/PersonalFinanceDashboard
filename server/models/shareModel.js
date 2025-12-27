@@ -34,7 +34,6 @@ const shareSchema = new mongoose.Schema(
       default: "active",
     },
      soldPrice: { type: Number },
-    // profitOrLoss: { type: Number },
   },
   { timestamps: true }
 );

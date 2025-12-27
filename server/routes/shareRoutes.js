@@ -18,7 +18,7 @@ router.put("/:id", auth,updateCurrentValue);
 router.put("/:id/sell",auth, markAsSold);
 router.delete("/:id",auth,deleteShare);
 
-// New route for live price tracking
+// route for live price tracking
 router.get("/live",auth,fetchLivePrices);
 
 module.exports = router;
