@@ -1,231 +1,111 @@
-// import { useState } from "react";
-// import {
-//   FaHome,
-//   FaWallet,
-//   FaChartPie,
-//   FaChartLine,
-//   FaTimes,
-//   FaChevronDown,
-//   FaChevronUp,
-// } from "react-icons/fa";
-// import { useNavigate } from "react-router-dom";
-
-// const Sidebar = ({ selectedPage }) => {
-//   const [isOpen, setIsOpen] = useState(true);
-//   const [expanded, setExpanded] = useState(null); // to handle dropdowns
-//   const navigate = useNavigate();
-
-//   const pages = [
-//     { name: "Dashboard", icon: <FaHome />, path: "/Dashboard" },
-//     { name: "Expenses", icon: <FaWallet />, path: "/expenses" },
-//     {
-//       name: "Investments",
-//       icon: <FaChartLine />,
-//       subpages: [
-//         { name: "Shares", path: "/shares" },
-//         { name: "Mutual Funds", path: "/mutualfunds" },
-//         { name: "Bullion", path: "/bullion" },
-//       ],
-//     },
-//     { name: "Income", icon: <FaWallet />, path: "/income" },
-//     { name: "Analytics", icon: <FaChartPie />, path: "/analytics" },
-//   ];
-
-//   const toggleExpand = (name) => {
-//     setExpanded(expanded === name ? null : name);
-//   };
-
-//   return (
-//     <div
-//       className={`fixed top-0 left-0 h-full bg-white shadow-lg transition-all duration-300 z-50 ${
-//         isOpen ? "w-64" : "w-16"
-//       }`}
-//     >
-//       {/* Toggle Button */}
-//       <button
-//         onClick={() => setIsOpen(!isOpen)}
-//         className="absolute top-4 right-[-20px] bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 transition"
-//       >
-//         {isOpen ? <FaTimes /> : "☰"}
-//       </button>
-
-//       {/* Menu Items */}
-//       <nav className="mt-16 flex flex-col">
-//         {pages.map((page) => (
-//           <div key={page.name}>
-//             <button
-//               onClick={() =>
-//                 page.subpages ? toggleExpand(page.name) : navigate(page.path)
-//               }
-//               className={`flex items-center justify-between p-4 hover:bg-gray-100 transition w-full ${
-//                 selectedPage === page.name ? "bg-gray-100 font-bold" : ""
-//               }`}
-//             >
-//               <div className="flex items-center gap-4">
-//                 <span className="text-xl">{page.icon}</span>
-//                 {isOpen && <span className="text-gray-800">{page.name}</span>}
-//               </div>
-//               {isOpen && page.subpages && (
-//                 <>
-//                   {expanded === page.name ? (
-//                     <FaChevronUp className="text-gray-500" />
-//                   ) : (
-//                     <FaChevronDown className="text-gray-500" />
-//                   )}
-//                 </>
-//               )}
-//             </button>
-
-//             {/* Subpages (like Shares, Mutual Funds, Bullion) */}
-//             {page.subpages && expanded === page.name && isOpen && (
-//               <div className="ml-10 flex flex-col">
-//                 {page.subpages.map((sub) => (
-//                   <button
-//                     key={sub.name}
-//                     onClick={() => navigate(sub.path)}
-//                     className={`text-left text-gray-700 py-2 hover:text-blue-600 ${
-//                       selectedPage === sub.name ? "font-bold text-blue-600" : ""
-//                     }`}
-//                   >
-//                     {sub.name}
-//                   </button>
-//                 ))}
-//               </div>
-//             )}
-//           </div>
-//         ))}
-//       </nav>
-//     </div>
-//   );
-// };
-
-// export default Sidebar;
-
-
-
-
 import { useState } from "react";
 import {
   FaHome,
   FaWallet,
   FaChartPie,
   FaChartLine,
-  FaTimes,
   FaChevronDown,
   FaChevronUp,
+  FaChevronLeft,
   FaSignOutAlt,
+  FaGem,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/authContext"; // ✅ Import the auth hook
+import { useAuth } from "../context/authContext";
 
-const Sidebar = ({ selectedPage }) => {
-  const [isOpen, setIsOpen] = useState(true);
+const Sidebar = ({ selectedPage, isOpen: externalIsOpen, setIsOpen: externalSetIsOpen }) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const navigate = useNavigate();
-  const { logout } = useAuth(); // ✅ Get logout from context
+  const { logout } = useAuth();
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalSetIsOpen || setInternalIsOpen;
+  const highlightBar = "absolute left-0 top-0 h-full w-1 rounded-r bg-gradient-to-b from-blue-500 via-indigo-400 to-emerald-400 shadow";
 
   const pages = [
-    { name: "Dashboard", icon: <FaHome />, path: "/dashboard" },
-    { name: "Expenses", icon: <FaWallet />, path: "/expenses" },
+    { name: "Dashboard", icon: <FaHome className="text-blue-500" />, path: "/dashboard" },
+     { name: "Income", icon: <FaWallet className="text-green-500" />, path: "/income" },
+    { name: "Expenses", icon: <FaWallet className="text-orange-500" />, path: "/expenses" },
     {
       name: "Investments",
-      icon: <FaChartLine />,
+      icon: <FaChartLine className="text-indigo-600" />,
       subpages: [
         { name: "Shares", path: "/shares" },
         { name: "Mutual Funds", path: "/mutualfunds" },
         { name: "Bullion", path: "/bullion" },
       ],
     },
-    { name: "Income", icon: <FaWallet />, path: "/income" },
-    { name: "Analytics", icon: <FaChartPie />, path: "/analytics" },
+    { name: "Analytics", icon: <FaChartPie className="text-fuchsia-600" />, path: "/analytics" },
   ];
 
-  const toggleExpand = (name) => {
-    setExpanded(expanded === name ? null : name);
-  };
-
-  // ✅ Handle logout click
-  const handleLogout = () => {
-    logout();          // Removes cookie + updates state
-    navigate("/login"); // Redirect to login
-  };
+  const toggleExpand = (name) => setExpanded(expanded === name ? null : name);
+  const handleLogout = () => { logout(); navigate("/login"); };
 
   return (
-    <div
-      className={`fixed top-0 left-0 h-full bg-white shadow-lg transition-all duration-300 z-50 ${
-        isOpen ? "w-64" : "w-16"
-      }`}
+    <aside
+      className={`fixed top-0 left-0 h-full border-r shadow-xl z-50 transition-all duration-300 backdrop-blur-xl ${isOpen ? "w-64 bg-gradient-to-b from-white/90 via-blue-50/80 to-indigo-50/70" : "w-16 bg-white/80"}`}
+      style={{ backdropFilter: 'blur(12px)' }}
     >
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="absolute top-4 right-[-20px] bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 transition"
-      >
-        {isOpen ? <FaTimes /> : "☰"}
-      </button>
-
-      {/* Menu Items */}
-      <nav className="mt-16 flex flex-col justify-between h-[90%]">
+      {/* Logo + Toggle */}
+      <div className={`flex items-center ${isOpen ? "pl-7 pr-4" : "justify-center"} h-20 border-b border-blue-100`}> 
+        <span className="inline-block mr-3">
+          <FaGem className="text-3xl text-indigo-500 drop-shadow-xl"/>
+        </span>
+        {isOpen && <span className="bg-clip-text text-xl font-extrabold bg-gradient-to-r from-blue-700 to-emerald-500 text-transparent tracking-tight select-none">FinDash</span>}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="ml-auto p-2 bg-gradient-to-r from-indigo-500 to-blue-400 text-white rounded-full shadow hover:from-blue-600 hover:to-indigo-700 transition"
+        >
+          {isOpen ? <FaChevronLeft /> : <FaChevronDown />}
+        </button>
+      </div>
+      {/* Nav */}
+      <nav className="mt-5 flex flex-col h-[calc(100%-6rem)] justify-between animate-fade-in-50">
         <div>
           {pages.map((page) => (
-            <div key={page.name}>
+            <div key={page.name} className="relative">
+              {/* Main Page Button */}
               <button
-                onClick={() =>
-                  page.subpages ? toggleExpand(page.name) : navigate(page.path)
-                }
-                className={`flex items-center justify-between p-4 hover:bg-gray-100 transition w-full ${
-                  selectedPage === page.name ? "bg-gray-100 font-bold" : ""
-                }`}
+                onClick={() => page.subpages ? toggleExpand(page.name) : navigate(page.path)}
+                className={`relative flex items-center gap-4 w-full px-7 py-2.5 group text-base font-semibold rounded-lg transition-all mb-1 ${selectedPage === page.name ? "bg-gradient-to-r from-blue-50 via-blue-100 to-emerald-50 text-blue-700 shadow-inner" : "text-gray-800 hover:bg-blue-50/70"}`}
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-xl">{page.icon}</span>
-                  {isOpen && <span className="text-gray-800">{page.name}</span>}
-                </div>
+                {selectedPage === page.name && <span className={highlightBar} />}
+                <span className="text-xl drop-shadow-md">{page.icon}</span>
+                {isOpen && <span>{page.name}</span>}
                 {isOpen && page.subpages && (
-                  <>
-                    {expanded === page.name ? (
-                      <FaChevronUp className="text-gray-500" />
-                    ) : (
-                      <FaChevronDown className="text-gray-500" />
-                    )}
-                  </>
+                  <span className="ml-auto">
+                    {expanded === page.name ? <FaChevronUp className="text-gray-500" /> : <FaChevronDown className="text-gray-500" />}
+                  </span>
                 )}
               </button>
-
               {/* Subpages */}
               {page.subpages && expanded === page.name && isOpen && (
-                <div className="ml-10 flex flex-col">
+                <ul className="ml-9 py-1 transition-all animate-fade-in-60">
                   {page.subpages.map((sub) => (
-                    <button
-                      key={sub.name}
-                      onClick={() => navigate(sub.path)}
-                      className={`text-left text-gray-700 py-2 hover:text-blue-600 ${
-                        selectedPage === sub.name
-                          ? "font-bold text-blue-600"
-                          : ""
-                      }`}
-                    >
-                      {sub.name}
-                    </button>
+                    <li key={sub.name}>
+                      <button
+                        onClick={() => navigate(sub.path)}
+                        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left ${selectedPage === sub.name ? "text-indigo-600 font-bold bg-indigo-50" : "text-gray-600 hover:text-blue-600 hover:bg-blue-50/50"}`}
+                      >
+                        <span className="w-2 h-2 mr-3 rounded-full bg-gradient-to-tr from-indigo-400 to-emerald-400 shadow-md" />
+                        {sub.name}
+                      </button>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
             </div>
           ))}
         </div>
-
-        {/* ✅ Logout button at bottom */}
-        <div className="mb-4">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-4 p-4 w-full text-red-600 hover:bg-red-50 transition"
-          >
+        {/* Logout Button Bottom */}
+        <div className="mb-7">
+          <button onClick={handleLogout} className="flex items-center gap-3 px-8 py-2 text-red-600 bg-gradient-to-r from-red-50 to-white font-semibold rounded-lg hover:from-red-100 hover:to-white shadow-lg w-full transition-all">
             <FaSignOutAlt className="text-xl" />
             {isOpen && <span>Logout</span>}
           </button>
         </div>
       </nav>
-    </div>
+    </aside>
   );
 };
 
