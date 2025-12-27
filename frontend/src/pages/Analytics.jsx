@@ -152,11 +152,10 @@ export default function Analytics() {
           monthMap[month].expense += e.amount;
         });
         
-        console.log("MonthMap:", Object.entries(monthMap));
         const trendArr = Object.entries(monthMap)
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([month, values]) => ({ month, ...values }));
-        console.log("TrendArr:", trendArr);
+       
         setTrendData(trendArr);
       } catch (err) {
         console.error(err);
