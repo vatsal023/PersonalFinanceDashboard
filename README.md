@@ -77,14 +77,8 @@ These visualizations help users understand spending behavior, portfolio distribu
 - JWT-based authentication  
 - Secure password hashing  
 - Protected API routes  
-- User-specific data isolation  
-
----
-
-## 🎯 Short GitHub Description (For "About" Section)
-
-Full-stack personal finance dashboard with JWT authentication, live market data integration, interactive analytics, asset allocation visualization, and monthly financial trend tracking.
-
+- User-specific data isolation
+- 
 ---
 
 ## 📌 Future Improvements
