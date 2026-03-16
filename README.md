@@ -166,5 +166,5 @@ Frontend (React.js) <-> Backend (Node.js/Express.js) <-> Database
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-# PersonalFinanceDashboard
+
 
