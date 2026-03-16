@@ -13,7 +13,7 @@ const ExpenseList = ({ expenses }) => {
   return (
     <div className="space-y-3">
       {expenses
-        .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
         .map((exp) => (
           <div
             key={exp._id}
@@ -29,7 +29,7 @@ const ExpenseList = ({ expenses }) => {
                 <div className="flex items-center gap-2 text-gray-600 text-sm">
                   <FaCalendarAlt />
                   <p>
-                    {new Date(exp.createdAt || exp.date).toLocaleDateString("en-IN", {
+                    {new Date(exp.date).toLocaleDateString("en-IN", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
