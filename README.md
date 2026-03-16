@@ -83,11 +83,11 @@ A web-based platform for managing personal finances, offering comprehensive trac
 
 ## Tech Stack
 
-- **Frontend**: React.js
+- **Frontend**: React.js,TailwindCSS
 - **Backend**: Node.js, Express.js
 - **Authentication**: JWT
-- **Database**: [Specify database, e.g., MongoDB, PostgreSQL]
-- **APIs**: Yahoo Finance API, Mutual Fund NAV APIs
+- **Database**: MongoDB
+- **APIs/Library**: Yahoo Finance Library, Mutual Fund NAV APIs
 - **Charts**: Chart.js / Recharts
 
 ---
@@ -96,10 +96,12 @@ A web-based platform for managing personal finances, offering comprehensive trac
 
 ```
 Frontend (React.js) <-> Backend (Node.js/Express.js) <-> Database
-			|                |                        |
-			|                |                        |
-	Yahoo Finance API   Mutual Fund NAV APIs   Authentication (JWT)
+                        |
+                        |
+         Yahoo Finance Library / Mutual Fund NAV APIs
 ```
+
+The backend uses the Yahoo Finance library and Mutual Fund NAV APIs to fetch live financial data, which is then served to the frontend. Authentication (JWT) and all business logic are handled in the backend.
 
 ---
 
@@ -118,7 +120,7 @@ Frontend (React.js) <-> Backend (Node.js/Express.js) <-> Database
 	  ```
 	- Backend:
 	  ```bash
-	  cd ../server
+	  cd server
 	  npm install
 	  ```
 3. **Configure environment variables:**
