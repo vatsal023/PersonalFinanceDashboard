@@ -155,8 +155,25 @@ The backend uses the Yahoo Finance library and Mutual Fund NAV APIs to fetch liv
 ## 📸 Screenshots
 
 ## Dashboard
-![Dashboard](Images/Dashboard Page.png)
-> _Add screenshots or GIFs here to showcase UI and features._
+![Dashboard](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Dashboard%20Page.png)
+
+## Income Page
+![Income](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Income%20Page.png)
+
+## Expenses Page
+![Expenses](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Expenses%20Page.png)
+
+## Shares Page
+![Shares](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Shares%20Page.png)
+
+## Mutual Funds Page
+![Mutual Funds](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Mutual%20Funds%20Page.png)
+
+## Bullion Page
+![Bullion](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Bullion%20Page.png)
+
+## Analytics
+![Analytics](https://github.com/vatsal023/PersonalFinanceDashboard/blob/73ceab3061d67f21c05ece05f7628e533085fb61/Images/Analytics%20Page.png)
 
 ---
 
