@@ -125,7 +125,11 @@ The backend uses the Yahoo Finance library and Mutual Fund NAV APIs to fetch liv
 	  ```
 3. **Configure environment variables:**
 	- Create `.env` files in both frontend and server as needed.
-	- Set up API keys for Yahoo Finance and Mutual Fund NAV APIs.
+    ```bash
+    PORT = <your backend server port>
+    JWTPRIVATEKEY = <your_jwt_secret>
+    DB = <your_mongo_connection_string>
+    ```
 4. **Start the application:**
 	- Backend:
 	  ```bash
