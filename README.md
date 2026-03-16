@@ -154,6 +154,8 @@ The backend uses the Yahoo Finance library and Mutual Fund NAV APIs to fetch liv
 
 ## 📸 Screenshots
 
+## Dashboard
+![Dashboard](Images/Dashboard Page.png)
 > _Add screenshots or GIFs here to showcase UI and features._
 
 ---
